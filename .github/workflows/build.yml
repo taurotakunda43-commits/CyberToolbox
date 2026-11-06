@@ -1,0 +1,38 @@
+name: Build CyberToolbox APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git zip unzip openjdk-17-jdk \
+            python3-pip autoconf libtool \
+            pkg-config zlib1g-dev \
+            libncurses5-dev libffi-dev \
+            libssl-dev cmake
+
+      - name: Install Buildozer
+        run: |
+          pip install buildozer Cython==0.29.33
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Build APK
+        run: buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CyberToolbox-APK
+          path: bin/*.apk
